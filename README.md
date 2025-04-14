@@ -19,8 +19,6 @@ The extension provides both a simple viewport capture for single frames and a re
 - **Viewport Capture**: Capture the current viewport as a standard RGB image
 - **Viewport Recording**: Record multiple frames with various data types (RGB, normals, depth, segmentation)
 - **ComfyUI Integration**: Custom nodes for ComfyUI that can access the captured data
-- **REST API**: Endpoints for capturing and recording viewport data
-- **Automatic Semantics**: Automatically adds semantic labels to objects in the scene
 
 ## Requirements
 
@@ -63,13 +61,6 @@ mklink (Your_ComfyUI_PATH)\custom_nodes\omni_nodes.py .\exts\omni.comfyui.connec
    - `Screen Record Omniverse Viewport`: Records multiple frames with various data types
 
 ![extension demo](demo/extension_demo.gif)
-
-### API Endpoints
-
-The extension exposes the following REST API endpoints:
-
-- `GET /viewport-capture/simple-capture`: Captures a single frame from the viewport
-- `GET /viewport-capture/viewport-record`: Records multiple frames with various data types
 
 ## Data Types
 

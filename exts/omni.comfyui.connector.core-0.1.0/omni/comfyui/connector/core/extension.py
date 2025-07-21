@@ -1,16 +1,13 @@
 import omni.ext
-import omni.ui as ui
 import omni.kit.ui
 from omni.services.core import main
 
 import carb
 import os
 from fastapi.staticfiles import StaticFiles
-from pathlib import Path
 
 from .services.viewport_capture import router as capture_router
 from .services.viewport_record import router as record_router
-from .ext_utils import join_with_replace
 
 # For convenience, let's also reuse the utility methods we already created to handle and format the storage location of
 # the captured images so they can be accessed by clients using the server, once API responses are issued from our
@@ -26,18 +23,10 @@ class ComfyUIConnectorExtension(omni.ext.IExt):
     WINDOW_NAME = "ComfyUI"
     MENU_PATH = f"Window/GliaCloud Custom/{WINDOW_NAME}"
 
-    COMFY_NODES_FILE_PATH = str(Path(__file__).parent.joinpath('omni_nodes.py'))
-    COMFY_WINDOWS_PATH = "C:/Users/gliacloud/Documents/ComfyUI_windows_portable/ComfyUI"
-    COMFY_PYTHON_WINDOWS_PATH = "C:/Users/gliacloud/Documents/ComfyUI_windows_portable/python_embeded/python.exe"
-
     def on_startup(self, ext_id):
         carb.log_warn("Extension started")
         global _global_instance
         _global_instance = self
-
-        # TODO: Add UI field & button to optionally start ComfyUI web server from within Omniverse.
-        self.comfy_path = ComfyUIConnectorExtension.COMFY_WINDOWS_PATH
-        self.comfy_python_path = ComfyUIConnectorExtension.COMFY_PYTHON_WINDOWS_PATH
 
         # store extension id in Carbonite
         _settings = carb.settings.get_settings()
@@ -69,13 +58,9 @@ class ComfyUIConnectorExtension(omni.ext.IExt):
             path=ext_utils.get_full_resource_path(), app=StaticFiles(directory=_local_resource_directory, html=True)
         )
 
-        self._link_comfy()
-
     def on_shutdown(self):
         global _global_instance
         _global_instance = None
-
-        self._unlink_comfy()
 
         _path = ext_utils.get_setting_service_path()
 
@@ -95,22 +80,6 @@ class ComfyUIConnectorExtension(omni.ext.IExt):
         main.deregister_mount(path=ext_utils.get_full_resource_path())
 
         carb.log_warn("Extension shut down.")
-
-    def _link_comfy(self):
-        carb.log_info("Linking custom Omniverse nodes to ComfyUI")
-        _comfy_custom_node_path = join_with_replace(self.comfy_path, "custom_nodes/omni_nodes.py")
-
-        if os.path.isfile(_comfy_custom_node_path):
-            os.unlink(_comfy_custom_node_path)
-
-        os.symlink(ComfyUIConnectorExtension.COMFY_NODES_FILE_PATH, _comfy_custom_node_path)
-
-    def _unlink_comfy(self):
-        _comfy_custom_node_path = join_with_replace(self.comfy_path, "custom_nodes/omni_nodes.py")
-
-        if os.path.isfile(_comfy_custom_node_path):
-            os.unlink(_comfy_custom_node_path)
-        carb.log_info("Unlinked ComfyUI")
 
     @staticmethod
     def get_instance():
